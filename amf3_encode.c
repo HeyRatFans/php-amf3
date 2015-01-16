@@ -158,26 +158,16 @@ static void encodeObject(smart_str *ss, zval *val, int opts, HashTable *sht, Has
 
 static void encodeValue(smart_str *ss, zval *val, int opts, HashTable *sht, HashTable *oht, HashTable *tht TSRMLS_DC) {
 	switch (Z_TYPE_P(val)) {
-		default:
-			smart_str_appendc(ss, AMF3_UNDEFINED);
-			break;
 		case IS_NULL:
 			smart_str_appendc(ss, AMF3_NULL);
 			break;
 		case IS_BOOL:
 			smart_str_appendc(ss, Z_LVAL_P(val) ? AMF3_TRUE : AMF3_FALSE);
 			break;
-		case IS_LONG: {
-			int n = Z_LVAL_P(val);
-			if ((n >= AMF3_MIN_INT) && (n <= AMF3_MAX_INT)) {
-				smart_str_appendc(ss, AMF3_INTEGER);
-				encodeU29(ss, n);
-			} else {
-				smart_str_appendc(ss, AMF3_DOUBLE);
-				encodeDouble(ss, n);
-			}
-			break;
-		}
+                case IS_LONG:
+                        smart_str_appendc(ss, AMF3_DOUBLE);
+                        encodeDouble(ss, Z_LVAL_P(val));
+                        break;/**/
 		case IS_DOUBLE:
 			smart_str_appendc(ss, AMF3_DOUBLE);
 			encodeDouble(ss, Z_DVAL_P(val));
@@ -196,6 +186,9 @@ static void encodeValue(smart_str *ss, zval *val, int opts, HashTable *sht, Hash
 			smart_str_appendc(ss, AMF3_OBJECT);
 			encodeObject(ss, val, opts, sht, oht, tht TSRMLS_CC);
 			break;
+                default:
+                        smart_str_appendc(ss, AMF3_UNDEFINED);
+                        break;
 	}
 }
 
